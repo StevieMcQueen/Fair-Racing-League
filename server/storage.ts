@@ -84,6 +84,7 @@ export class MemStorage implements IStorage {
     const driver: Driver = { 
       ...insertDriver, 
       id,
+      isActive: insertDriver.isActive ?? 1,
       createdAt: new Date()
     };
     this.drivers.set(id, driver);
@@ -124,6 +125,7 @@ export class MemStorage implements IStorage {
     const race: Race = { 
       ...insertRace, 
       id,
+      weather: insertRace.weather ?? null,
       createdAt: new Date()
     };
     this.races.set(id, race);
@@ -170,11 +172,19 @@ export class MemStorage implements IStorage {
 
   async createRaceResult(insertResult: InsertRaceResult): Promise<RaceResult> {
     const id = randomUUID();
-    const totalPoints = insertResult.basePoints + insertResult.bonusPoints - insertResult.penaltyPoints;
+    const basePoints = insertResult.basePoints ?? 0;
+    const bonusPoints = insertResult.bonusPoints ?? 0;
+    const penaltyPoints = insertResult.penaltyPoints ?? 0;
+    const totalPoints = basePoints + bonusPoints - penaltyPoints;
     
     const result: RaceResult = { 
       ...insertResult, 
       id,
+      position: insertResult.position ?? null,
+      status: insertResult.status ?? "finished",
+      basePoints,
+      bonusPoints,
+      penaltyPoints,
       totalPoints: Math.max(0, totalPoints), // Ensure points don't go negative
       createdAt: new Date()
     };
@@ -211,6 +221,7 @@ export class MemStorage implements IStorage {
     const config: PointsConfiguration = { 
       ...insertConfig, 
       id,
+      isActive: insertConfig.isActive ?? 0,
       createdAt: new Date()
     };
     this.pointsConfigurations.set(id, config);
@@ -231,7 +242,7 @@ export class MemStorage implements IStorage {
     if (!config) return false;
     
     // Deactivate all configurations
-    for (const [configId, config] of this.pointsConfigurations.entries()) {
+    for (const [configId, config] of Array.from(this.pointsConfigurations.entries())) {
       config.isActive = 0;
       this.pointsConfigurations.set(configId, config);
     }
@@ -246,7 +257,7 @@ export class MemStorage implements IStorage {
     const standings = new Map<string, ChampionshipStanding>();
     
     // Initialize standings for all active drivers
-    for (const driver of this.drivers.values()) {
+    for (const driver of Array.from(this.drivers.values())) {
       if (driver.isActive === 1) {
         standings.set(driver.id, {
           driver,
@@ -258,7 +269,7 @@ export class MemStorage implements IStorage {
     }
     
     // Calculate points from race results
-    for (const result of this.raceResults.values()) {
+    for (const result of Array.from(this.raceResults.values())) {
       const standing = standings.get(result.driverId);
       if (standing) {
         standing.totalPoints += result.totalPoints;

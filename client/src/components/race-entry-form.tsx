@@ -117,8 +117,7 @@ export default function RaceEntryForm({ onBack }: RaceEntryFormProps) {
       // Create new race if needed
       if (data.useNewRace && data.newRace) {
         const newRace = await createRaceMutation.mutateAsync(data.newRace);
-        raceId = newRace.json().then((race: Race) => race.id);
-        raceId = (await newRace.json()).id;
+        raceId = newRace.id;
       }
 
       if (!raceId) {

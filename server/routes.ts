@@ -73,7 +73,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/races", async (req, res) => {
     try {
       const raceData = insertRaceSchema.parse(req.body);
-      const race = await storage.createRace(raceData);
+      // Convert string date to Date object if needed
+      const processedData = {
+        ...raceData,
+        date: typeof raceData.date === 'string' ? new Date(raceData.date) : raceData.date,
+      };
+      const race = await storage.createRace(processedData);
       res.json(race);
     } catch (error) {
       if (error instanceof z.ZodError) {

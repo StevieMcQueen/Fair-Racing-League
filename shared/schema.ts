@@ -55,9 +55,10 @@ export const insertDriverSchema = createInsertSchema(drivers).omit({
   createdAt: true,
 });
 
-export const insertRaceSchema = createInsertSchema(races).omit({
-  id: true,
-  createdAt: true,
+export const insertRaceSchema = z.object({
+  name: z.string().min(1),
+  date: z.string().or(z.date()),
+  weather: z.string().nullable().optional(),
 });
 
 export const insertRaceResultSchema = createInsertSchema(raceResults).omit({
