@@ -22,27 +22,31 @@ Preferred communication style: Simple, everyday language.
 ### Backend Architecture
 - **Framework**: Express.js with TypeScript
 - **API Design**: RESTful API with route-based organization
-- **Database**: PostgreSQL with Drizzle ORM
+- **Database**: In-memory storage with MemStorage implementation
 - **Schema Validation**: Zod schemas shared between frontend and backend
 - **Development Setup**: Hot reloading with Vite integration in development mode
 - **Error Handling**: Centralized error handling middleware
 
 ### Database Design
-- **ORM**: Drizzle ORM with PostgreSQL dialect
+- **Storage**: In-memory storage implementation (MemStorage)
 - **Schema Structure**: 
   - Drivers table (name, team, nationality, active status)
   - Races table (name, date, weather conditions)
+  - Qualifying Results table (linking drivers to races with positions and lap times)
   - Race Results table (linking drivers to races with positions, points, status)
   - Points Configuration table (position points, bonus rules, penalty rules)
-- **Data Relationships**: Foreign key relationships between races, drivers, and results
-- **Points System**: Flexible points configuration with support for position points, bonuses, and penalties
+- **Data Relationships**: Foreign key relationships between races, drivers, qualifying results, and race results
+- **Points System**: Flexible points configuration with position points, bonuses (fastest lap, pole position, fairness bonus), and penalties
+- **Fairness Points**: Default 5 fairness points awarded to all drivers per race
 
 ### Key Features
 - **Driver Management**: CRUD operations for driver profiles with team assignments
 - **Race Scheduling**: Create and manage race events with date and weather tracking
+- **Qualifying Results**: Record qualifying sessions with lap times and starting positions
 - **Results Entry**: Record race results with finishing positions, DNF/DSQ status, and point calculations
 - **Championship Standings**: Automatic calculation of driver standings based on accumulated points
-- **Points Configuration**: Customizable points system for different race formats
+- **Points Configuration**: Customizable points system with fairness bonus instead of most overtakes
+- **Fairness Points System**: All drivers receive 5 fairness points by default per race
 - **Responsive Design**: Mobile-friendly interface with sidebar navigation
 
 ### Development Patterns

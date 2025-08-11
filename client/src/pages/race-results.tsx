@@ -118,6 +118,7 @@ export default function RaceResults() {
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Base Points</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bonus</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fairness</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Penalty</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Points</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -138,6 +139,7 @@ export default function RaceResults() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{result.driver.team}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{result.basePoints}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600">+{result.bonusPoints}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">+{result.fairnessPoints || 5}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600">-{result.penaltyPoints}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{result.totalPoints}</td>
                             <td className="px-6 py-4 whitespace-nowrap">

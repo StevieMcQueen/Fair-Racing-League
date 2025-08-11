@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import Drivers from "@/pages/drivers";
 import RaceResults from "@/pages/race-results";
+import QualifyingResults from "@/pages/qualifying-results";
 import ChampionshipStandings from "@/pages/championship-standings";
 import RaceSchedule from "@/pages/race-schedule";
 import PointsConfiguration from "@/pages/points-configuration";
@@ -21,6 +22,7 @@ function Router() {
           <Route path="/" component={Dashboard} />
           <Route path="/drivers" component={Drivers} />
           <Route path="/race-results" component={RaceResults} />
+          <Route path="/qualifying-results" component={QualifyingResults} />
           <Route path="/championship-standings" component={ChampionshipStandings} />
           <Route path="/race-schedule" component={RaceSchedule} />
           <Route path="/points-configuration" component={PointsConfiguration} />

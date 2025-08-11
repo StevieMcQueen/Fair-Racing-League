@@ -1,10 +1,11 @@
 import { Link, useLocation } from "wouter";
-import { FlagIcon, TrophyIcon, ListOrderedIcon, UsersIcon, CalendarIcon, SettingsIcon, GaugeIcon } from "lucide-react";
+import { FlagIcon, TrophyIcon, ListOrderedIcon, UsersIcon, CalendarIcon, SettingsIcon, GaugeIcon, ClockIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: GaugeIcon },
   { name: "Race Results", href: "/race-results", icon: TrophyIcon },
+  { name: "Qualifying Results", href: "/qualifying-results", icon: ClockIcon },
   { name: "Championship Standings", href: "/championship-standings", icon: ListOrderedIcon },
   { name: "Drivers", href: "/drivers", icon: UsersIcon },
   { name: "Race Schedule", href: "/race-schedule", icon: CalendarIcon },

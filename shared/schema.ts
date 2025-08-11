@@ -20,6 +20,15 @@ export const races = pgTable("races", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const qualifyingResults = pgTable("qualifying_results", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  raceId: varchar("race_id").references(() => races.id).notNull(),
+  driverId: varchar("driver_id").references(() => drivers.id).notNull(),
+  position: integer("position").notNull(),
+  lapTime: text("lap_time"), // best lap time as string (e.g., "1:23.456")
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const raceResults = pgTable("race_results", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   raceId: varchar("race_id").references(() => races.id).notNull(),
@@ -29,6 +38,7 @@ export const raceResults = pgTable("race_results", {
   basePoints: integer("base_points").default(0).notNull(),
   bonusPoints: integer("bonus_points").default(0).notNull(),
   penaltyPoints: integer("penalty_points").default(0).notNull(),
+  fairnessPoints: integer("fairness_points").default(5).notNull(), // default 5 fairness points
   totalPoints: integer("total_points").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -41,7 +51,7 @@ export const pointsConfiguration = pgTable("points_configuration", {
   bonusRules: json("bonus_rules").notNull().$type<{
     fastestLap: number;
     polePosition: number;
-    mostOvertakes: number;
+    fairnessBonus: number;
   }>(),
   penaltyRules: json("penalty_rules").notNull().$type<{
     racingIncident: number;
@@ -61,6 +71,11 @@ export const insertRaceSchema = z.object({
   weather: z.string().nullable().optional(),
 });
 
+export const insertQualifyingResultSchema = createInsertSchema(qualifyingResults).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertRaceResultSchema = createInsertSchema(raceResults).omit({
   id: true,
   createdAt: true,
@@ -78,11 +93,19 @@ export type Driver = typeof drivers.$inferSelect;
 export type InsertRace = z.infer<typeof insertRaceSchema>;
 export type Race = typeof races.$inferSelect;
 
+export type InsertQualifyingResult = z.infer<typeof insertQualifyingResultSchema>;
+export type QualifyingResult = typeof qualifyingResults.$inferSelect;
+
 export type InsertRaceResult = z.infer<typeof insertRaceResultSchema>;
 export type RaceResult = typeof raceResults.$inferSelect;
 
 export type InsertPointsConfiguration = z.infer<typeof insertPointsConfigurationSchema>;
 export type PointsConfiguration = typeof pointsConfiguration.$inferSelect;
+
+export type QualifyingResultWithDetails = QualifyingResult & {
+  driver: Driver;
+  race: Race;
+};
 
 export type RaceResultWithDetails = RaceResult & {
   driver: Driver;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ const defaultPositionPoints = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1, 0, 0, 0, 0, 0,
 const defaultBonusRules = {
   fastestLap: 1,
   polePosition: 1,
-  mostOvertakes: 2,
+  fairnessBonus: 2,
 };
 const defaultPenaltyRules = {
   racingIncident: 5,
@@ -64,7 +64,7 @@ export default function PointsConfiguration() {
   });
 
   // Initialize form with active config data
-  useState(() => {
+  useEffect(() => {
     if (activeConfig) {
       form.reset({
         name: activeConfig.name,
@@ -74,7 +74,7 @@ export default function PointsConfiguration() {
         penaltyRules: activeConfig.penaltyRules,
       });
     }
-  });
+  }, [activeConfig, form]);
 
   const onSaveConfiguration = (data: InsertPointsConfiguration) => {
     if (activeConfig) {
@@ -176,7 +176,6 @@ export default function PointsConfiguration() {
                                     <Input 
                                       type="number" 
                                       min="0" 
-                                      {...field}
                                       value={field.value || 0}
                                       onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                                     />
@@ -281,13 +280,13 @@ export default function PointsConfiguration() {
 
                           <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
                             <div>
-                              <p className="font-medium text-gray-900">Most Overtakes</p>
-                              <p className="text-sm text-gray-500">Driver with most position gains</p>
+                              <p className="font-medium text-gray-900">Fairness Bonus</p>
+                              <p className="text-sm text-gray-500">Awarded for fair racing (default: 5 points per driver)</p>
                             </div>
                             <div className="flex items-center space-x-3">
                               <FormField
                                 control={form.control}
-                                name="bonusRules.mostOvertakes"
+                                name="bonusRules.fairnessBonus"
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormControl>

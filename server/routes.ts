@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertDriverSchema, insertRaceSchema, insertRaceResultSchema, insertPointsConfigurationSchema } from "@shared/schema";
+import { insertDriverSchema, insertRaceSchema, insertQualifyingResultSchema, insertRaceResultSchema, insertPointsConfigurationSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -85,6 +85,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(400).json({ message: "Invalid race data", errors: error.errors });
       } else {
         res.status(500).json({ message: "Failed to create race" });
+      }
+    }
+  });
+
+  // Qualifying results routes
+  app.get("/api/qualifying-results", async (req, res) => {
+    try {
+      const results = await storage.getQualifyingResults();
+      res.json(results);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch qualifying results" });
+    }
+  });
+
+  app.get("/api/qualifying-results/race/:raceId", async (req, res) => {
+    try {
+      const results = await storage.getQualifyingResultsByRace(req.params.raceId);
+      res.json(results);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch qualifying results" });
+    }
+  });
+
+  const createQualifyingResultsSchema = z.object({
+    raceId: z.string(),
+    results: z.array(insertQualifyingResultSchema.omit({ raceId: true }))
+  });
+
+  app.post("/api/qualifying-results", async (req, res) => {
+    try {
+      const { raceId, results } = createQualifyingResultsSchema.parse(req.body);
+      
+      const createdResults = [];
+      for (const resultData of results) {
+        const result = await storage.createQualifyingResult({
+          ...resultData,
+          raceId,
+        });
+        createdResults.push(result);
+      }
+      
+      res.json(createdResults);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid qualifying results data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create qualifying results" });
       }
     }
   });
