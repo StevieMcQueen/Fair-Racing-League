@@ -1,4 +1,4 @@
-import { type Driver, type InsertDriver, type Race, type InsertRace, type RaceResult, type InsertRaceResult, type PointsConfiguration, type InsertPointsConfiguration, type RaceResultWithDetails, type ChampionshipStanding } from "@shared/schema";
+import { type Driver, type InsertDriver, type Race, type InsertRace, type QualifyingResult, type InsertQualifyingResult, type QualifyingResultWithDetails, type RaceResult, type InsertRaceResult, type PointsConfiguration, type InsertPointsConfiguration, type RaceResultWithDetails, type ChampionshipStanding } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -15,6 +15,14 @@ export interface IStorage {
   createRace(race: InsertRace): Promise<Race>;
   updateRace(id: string, race: Partial<InsertRace>): Promise<Race | undefined>;
   deleteRace(id: string): Promise<boolean>;
+
+  // Qualifying Results
+  getQualifyingResults(): Promise<QualifyingResult[]>;
+  getQualifyingResultsByRace(raceId: string): Promise<QualifyingResultWithDetails[]>;
+  getQualifyingResult(id: string): Promise<QualifyingResult | undefined>;
+  createQualifyingResult(result: InsertQualifyingResult): Promise<QualifyingResult>;
+  updateQualifyingResult(id: string, result: Partial<InsertQualifyingResult>): Promise<QualifyingResult | undefined>;
+  deleteQualifyingResult(id: string): Promise<boolean>;
 
   // Race Results
   getRaceResults(): Promise<RaceResult[]>;
@@ -38,12 +46,14 @@ export interface IStorage {
 export class MemStorage implements IStorage {
   private drivers: Map<string, Driver>;
   private races: Map<string, Race>;
+  private qualifyingResults: Map<string, QualifyingResult>;
   private raceResults: Map<string, RaceResult>;
   private pointsConfigurations: Map<string, PointsConfiguration>;
 
   constructor() {
     this.drivers = new Map();
     this.races = new Map();
+    this.qualifyingResults = new Map();
     this.raceResults = new Map();
     this.pointsConfigurations = new Map();
     
@@ -60,7 +70,7 @@ export class MemStorage implements IStorage {
       bonusRules: {
         fastestLap: 1,
         polePosition: 1,
-        mostOvertakes: 2,
+        fairnessBonus: 2,
       },
       penaltyRules: {
         racingIncident: 5,
@@ -145,6 +155,57 @@ export class MemStorage implements IStorage {
     return this.races.delete(id);
   }
 
+  // Qualifying Results methods
+  async getQualifyingResults(): Promise<QualifyingResult[]> {
+    return Array.from(this.qualifyingResults.values());
+  }
+
+  async getQualifyingResultsByRace(raceId: string): Promise<QualifyingResultWithDetails[]> {
+    const results = Array.from(this.qualifyingResults.values())
+      .filter(result => result.raceId === raceId)
+      .sort((a, b) => a.position - b.position);
+    
+    const resultsWithDetails: QualifyingResultWithDetails[] = [];
+    for (const result of results) {
+      const driver = this.drivers.get(result.driverId);
+      const race = this.races.get(result.raceId);
+      if (driver && race) {
+        resultsWithDetails.push({ ...result, driver, race });
+      }
+    }
+    
+    return resultsWithDetails;
+  }
+
+  async getQualifyingResult(id: string): Promise<QualifyingResult | undefined> {
+    return this.qualifyingResults.get(id);
+  }
+
+  async createQualifyingResult(insertResult: InsertQualifyingResult): Promise<QualifyingResult> {
+    const id = randomUUID();
+    const result: QualifyingResult = { 
+      ...insertResult, 
+      id,
+      lapTime: insertResult.lapTime ?? null,
+      createdAt: new Date()
+    };
+    this.qualifyingResults.set(id, result);
+    return result;
+  }
+
+  async updateQualifyingResult(id: string, updates: Partial<InsertQualifyingResult>): Promise<QualifyingResult | undefined> {
+    const result = this.qualifyingResults.get(id);
+    if (!result) return undefined;
+    
+    const updatedResult: QualifyingResult = { ...result, ...updates };
+    this.qualifyingResults.set(id, updatedResult);
+    return updatedResult;
+  }
+
+  async deleteQualifyingResult(id: string): Promise<boolean> {
+    return this.qualifyingResults.delete(id);
+  }
+
   async getRaceResults(): Promise<RaceResult[]> {
     return Array.from(this.raceResults.values());
   }
@@ -175,7 +236,8 @@ export class MemStorage implements IStorage {
     const basePoints = insertResult.basePoints ?? 0;
     const bonusPoints = insertResult.bonusPoints ?? 0;
     const penaltyPoints = insertResult.penaltyPoints ?? 0;
-    const totalPoints = basePoints + bonusPoints - penaltyPoints;
+    const fairnessPoints = insertResult.fairnessPoints ?? 5; // Default 5 fairness points
+    const totalPoints = basePoints + bonusPoints + fairnessPoints - penaltyPoints;
     
     const result: RaceResult = { 
       ...insertResult, 
@@ -185,6 +247,7 @@ export class MemStorage implements IStorage {
       basePoints,
       bonusPoints,
       penaltyPoints,
+      fairnessPoints,
       totalPoints: Math.max(0, totalPoints), // Ensure points don't go negative
       createdAt: new Date()
     };
@@ -197,7 +260,7 @@ export class MemStorage implements IStorage {
     if (!result) return undefined;
     
     const updatedResult: RaceResult = { ...result, ...updates };
-    const totalPoints = updatedResult.basePoints + updatedResult.bonusPoints - updatedResult.penaltyPoints;
+    const totalPoints = updatedResult.basePoints + updatedResult.bonusPoints + updatedResult.fairnessPoints - updatedResult.penaltyPoints;
     updatedResult.totalPoints = Math.max(0, totalPoints);
     
     this.raceResults.set(id, updatedResult);
