@@ -15,7 +15,7 @@ export default function Dashboard() {
     queryKey: ["/api/races"],
   });
 
-  const { data: drivers = [] } = useQuery({
+  const { data: drivers = [] } = useQuery<Driver[]>({
     queryKey: ["/api/drivers"],
   });
 
