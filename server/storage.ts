@@ -64,17 +64,17 @@ export class MemStorage implements IStorage {
   private initializeDefaultPointsConfiguration() {
     const defaultConfig: PointsConfiguration = {
       id: randomUUID(),
-      name: "Default F1 Points System",
+      name: "Punkte System",
       isActive: 1,
-      positionPoints: [25, 18, 15, 12, 10, 8, 6, 4, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      positionPoints: [20, 17, 14, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       bonusRules: {
         fastestLap: 1,
         polePosition: 1,
-        fairnessBonus: 2,
+        fairnessBonus: 5,
       },
       penaltyRules: {
-        racingIncident: 5,
-        trackLimits: 2,
+        Punkteabzug: 5,
+        weitereStrafen: 2,
       },
       createdAt: new Date(),
     };
